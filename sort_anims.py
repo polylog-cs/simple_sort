@@ -3,8 +3,8 @@ from manim import *
 
 text_color = GRAY
 circum_color = RED
-title_smaller_font_size = 60
-
+title_smaller_font_size = 70
+code_font_size = 60
 
 class Intro(Scene):
     def construct(self):
@@ -12,77 +12,96 @@ class Intro(Scene):
         buffer = 0.5
 
         rozhon = Tex(
-            r"\textbf{Václav Rozhoň}: script, animation", 
+            r"\textbf{Václav Rozhoň, Václav Volhejn}", 
             color=text_color,
             font_size = 40,
         ).shift(
             DOWN * buffer
         )
-        volhejn = Tex(
-            r"\textbf{Václav Volhejn}: voice, script, animation",
-            color=text_color,
-            font_size = 40,
-        ).shift(2 * DOWN * buffer)
 
+        stanley = Tex("Based on this nice paper by Stanley Fung", font_size = 40, color = text_color)
 
-        names = Group(rozhon, volhejn)
-        names.shift(2 * DOWN + 3*LEFT)
-
-        volhejn.align_to(names, LEFT)
-        rozhon.align_to(names, LEFT)
-
+        shft = 2.8 * LEFT
+        names = Group(rozhon, stanley).arrange(DOWN, buff = 2* DEFAULT_MOBJECT_TO_MOBJECT_BUFFER)
+        names.shift(2 * DOWN + shft)
         channel_name = Tex(r"polylog", color=text_color)
-        channel_name.scale(4).shift(1 * UP + 1* LEFT)
+        channel_name.scale(4).shift(1 * UP + shft)
 
         arxiv_img = ImageMobject("img/stanley_fung-1.png").scale_to_fit_height(
             6
         ).move_to(
-            5*RIGHT + 0.5*DOWN
+            4*RIGHT
         )
-
-        stanley1 = Tex("Based on this very nice paper", font_size = 50, color = text_color)
-        stanley2 = Tex("by Stanley Fung", font_size = 50, color = text_color)
-        stanley = Group(stanley1, stanley2).arrange(DOWN, aligned_edge = RIGHT).shift(3*DOWN+LEFT)
-        # for s in [stanley1, stanley2]:
-        #     s.next_to(arxiv_img, LEFT)
 
         run_time = Write(channel_name).run_time
         self.play(
-            Write(volhejn, run_time=run_time),
-            Write(rozhon, run_time=run_time),
+            *[Write(txt, run_time=run_time) for txt in [rozhon, stanley]],
             Write(channel_name, run_time=run_time),
+            FadeIn(arxiv_img),
         )
 
         self.wait()
 
-        self.play(
-            AnimationGroup(
-                AnimationGroup(
-                    Unwrite(volhejn, reverse=True),
-                    Unwrite(rozhon),
-                ),
-                AnimationGroup(
-                    Write(stanley1),
-                    FadeIn(arxiv_img),
-                ),
-                AnimationGroup(
-                    Write(stanley2),
-                ),
-                lag_ratio = 0.5
-            )
-            #run_time=1,
-        )
-        self.wait(1)
+        # self.play(
+        #     AnimationGroup(
+        #         AnimationGroup(
+        #             Unwrite(volhejn),
+        #             Unwrite(rozhon),
+        #         ),
+        #         AnimationGroup(
+        #             Write(stanley1),
+        #             FadeIn(arxiv_img),
+        #         ),
+        #         AnimationGroup(
+        #             Write(stanley2),
+        #         ),
+        #         lag_ratio = 0.5
+        #     )
+        #     #run_time=1,
+        # )
+        # self.wait(1)
 
 
         self.play(
             Unwrite(channel_name),
             FadeOut(arxiv_img),
-            FadeOut(stanley1),
-            FadeOut(stanley2),
+            *[Unwrite(txt) for txt in [rozhon, stanley]],
             run_time=1,
         )
         self.wait(1)
+
+
+# class FlyingAlgorithms(Scene):
+#     def construct(self):
+
+#         bubble_lines = [
+#             "def bubblesort(a):",
+#             "{{for i = 1 to }}{{n-1}}{{:}}",
+#             "{{for j =}}{{1}}{{ to n-1:}}",
+#             "{{if a[j+1] }}{{< }}{{ a[j]:}}",
+#             "{{swap(a[j], a[j+1])}}"
+#         ]
+
+#         select_lines = [
+#             "def selectsort(a):",
+#             "{{for i = 1 to }}{{n}}{{:}}",
+#             "{{for j = }}{{i+1}}{{ to }}{{n:}}",
+#             "{{if a[i] }}{{>}}{{ a[j]:}}",
+#             "swap(a[i], a[j])"
+#         ]
+
+#         quick_lines = [
+#             "def quicksort(a):",
+#             "if a=[] return []",
+#             "return quicksort(a[<=a[1]])",
+#             "+ a[1] + quicksort(a[>a[1]])"
+#         ]
+
+#         bogo_lines = [
+#             "def bogosort(a):",
+#             "while a not sorted:",
+#             "shuffle(a)"
+#         ]
 
 class SortAnims:
     indent = 0.5*RIGHT
@@ -92,7 +111,9 @@ class SortAnims:
     same_pos_diff = 0.3*RIGHT
     title_font_size = 70
     title_pos = 3*UP
-    colors = [RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE]
+    #colors = [RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE]
+    colors = [RED, ORANGE, GREEN, TEAL, BLUE, VIOLET, MAGENTA]
+    colors = [GREEN, TEAL, BLUE, VIOLET, MAGENTA, RED, ORANGE]
 
     def __init__(self, heights):
         assert len(self.colors) >= len(heights)
@@ -335,7 +356,7 @@ class SortAnims:
         anims = []
 
         selecttext = [
-            Tex(str, color = text_color)
+            Tex(str, color = text_color, font_size = code_font_size)
             for str in lines
         ]
 
@@ -401,14 +422,15 @@ class SortAnims:
 
         return anims
 
-class Algorithms(Scene):
+class SimpleSort(Scene):
     def construct(self):
         skip = False
 
-        self.next_section(name = "bubblesort", skip_animations=skip)
+        self.next_section(name = "bubblesort", skip_animations=True)
 
-        permutation = [4, 6, 2, 3, 5, 1]
+        #permutation = [4, 6, 2, 3, 5, 1]
         permutation = [3, 7, 2, 4, 6, 5, 1]
+        #permutation = range(1, 9)
         sort_obj = SortAnims(permutation)
     
         bubble_anims = sort_obj.run_bubblesort()
@@ -417,7 +439,7 @@ class Algorithms(Scene):
         for anim in bubble_anims:
             self.play(anim, run_time = 1)
         self.wait()
-
+        
         # run select sort
         self.next_section(name = "selectsort", skip_animations=skip)
         select_anims = sort_obj.run_selectsort(weird_sort=False, sign='>')
@@ -477,6 +499,7 @@ class Algorithms(Scene):
                             Group(*sort_obj.text),
                             flash_radius=2,
                             num_lines=16,
+                            color = circum_color
                         )
                     )   
                     self.wait()
@@ -499,7 +522,7 @@ class Algorithms(Scene):
         self.wait()
 
         # run weird sort for the second time
-        self.next_section(name = "weirdsort2", skip_animations=False)
+        self.next_section(name = "weirdsort2", skip_animations=skip)
         weird_anims = sort_obj.run_selectsort(weird_sort=True, sign='>', title = "Simplesort?", last = True)
         num_anim_groups = len(weird_anims)
 
@@ -509,9 +532,9 @@ class Algorithms(Scene):
             for j, anim in enumerate(anim_group):
                 if i == 5 and j == 1: # highlight the smallest elem at the beginning of the explain iteration
                     rectangles_sorted = sorted(sort_obj.rectangles, key = lambda x : x[0].get_center()[0])
-                    self.play(Circumscribe(rectangles_sorted[3][0]), color = circum_color)
+                    self.play(Circumscribe(rectangles_sorted[3][0], color = circum_color))
                     self.wait()
-                    self.play(Circumscribe(rectangles_sorted[4][0]), color = circum_color)
+                    self.play(Circumscribe(rectangles_sorted[4][0], color = circum_color))
                     self.wait()
 
                 if i>1 and j == 2*i-1:
@@ -539,7 +562,9 @@ class Algorithms(Scene):
             if i == 1:
                 #highlight the smallest elem after first iteration                
                 rectangles_sorted = sorted(sort_obj.rectangles, key = lambda x : x[0].get_center()[0])
-                self.play(Circumscribe(rectangles_sorted[0][0]), color = circum_color)
+                self.play(
+                    Circumscribe(rectangles_sorted[0][0], color = circum_color)
+                )
                 self.wait()
 
                 # create brace
@@ -554,7 +579,7 @@ class Algorithms(Scene):
         self.wait()
 
         # change to insert sort
-        self.next_section(name = "outro", skip_animations=False)
+        self.next_section(name = "outro", skip_animations=skip)
         self.play(
             Circumscribe(
                 sort_obj.text[1][3], color = circum_color
@@ -563,7 +588,8 @@ class Algorithms(Scene):
         self.wait()
         newline = Tex(
             "{{for j = }}{{1}}{{ to }}{{i:}}",
-            color = text_color
+            color = text_color,
+            font_size = code_font_size,
         ).move_to(
             sort_obj.text[1].get_center()
         ).align_to(
@@ -591,7 +617,8 @@ class Algorithms(Scene):
             sort_obj.title.animate.become(
                 insert_title
             )
-        )        
+        )       
+        self.wait() 
 
         # create select sort pseudocode
         
@@ -616,7 +643,7 @@ class Algorithms(Scene):
             "swap(a[i], a[j])"
         ] 
         select_text = [
-            Tex(str, color = text_color)
+            Tex(str, color = text_color, font_size = code_font_size)
             for str in select_lines
         ]
         for i, text in enumerate(select_text):
@@ -645,6 +672,7 @@ class Algorithms(Scene):
         self.wait()
 
 
+        self.next_section(name = "join", skip_animations=False)
         # final join of the two codes
         simple_lines = [
             "{{for i = 1 to }}{{n}}{{:}}",
@@ -670,3 +698,34 @@ class Algorithms(Scene):
         )        
         self.wait()
 
+
+        self.remove(
+            *select_text
+        )
+
+        # change the comparison sign
+        self.play(
+            Circumscribe(sort_obj.text[2][1], color = circum_color)
+        )
+        self.wait()
+
+        self.play(
+            sort_obj.text[2].animate.become(
+                Tex("{{if a[i] }}{{<}}{{ a[j]:}}", color = text_color, font_size = 80).move_to(sort_obj.text[2].get_center())
+            )
+        )
+        self.wait()
+
+
+        self.play(
+            Write(
+                Tex(
+                    "*for a sufficiently perverse definition of the word simple",
+                    color = text_color,
+                    font_size = 50
+                ).move_to(
+                    3*DOWN
+                )
+            )
+        )
+        self.wait()
